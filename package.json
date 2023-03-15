@@ -1,0 +1,29 @@
+{
+  "name": "toos",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "link": "npm link"
+  },
+  "bin": {
+    "retry": "./retry.mjs",
+    "gen": "./gen.mjs",
+    "gitProxy": "./gitProxy.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "clipboardy": "^3.0.0",
+    "dayjs": "^1.11.5",
+    "dns-over-http": "^0.2.0",
+    "glob": "^8.0.3",
+    "json2ts": "^0.0.7",
+    "lodash-es": "^4.17.21",
+    "node-fetch": "^3.2.10",
+    "node-notifier": "^10.0.1",
+    "yargs-parser": "^21.1.1",
+    "zx": "^7.0.7"
+  }
+}
