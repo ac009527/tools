@@ -1,33 +1,16 @@
-import { argv, glob, fs, sleep, echo, chalk } from 'zx';
+import { argv, glob, fs, sleep, echo } from 'zx';
 import fastq from 'fastq'
 import sharp from 'sharp'
 import CryptoJS from 'crypto-js'
 
 const cwd = process.cwd()
 
-const { inputDir, quality = 80, logLevel = 'info'} = argv;
+const { inputDir, quality = 80 } = argv;
 
-const log = {
-    debug: (message) => {
-        if (['debug'].includes(logLevel)) {
-            echo(chalk.blue('[debug]'), message);
-        }
-    },
-    error: (message) => {
-        echo(chalk.red(message));
-    },
-    info: (message) => {
-        if (['info'].includes(logLevel)) {
-            echo(chalk.cyan('[info]'), message);
-        }
-    },
-};
-
-const imgFiles = await glob(`${inputDir}/**/*.{jpg,jpeg,png}`, {
-    ignore: [`${inputDir}/**/*.{nocompress.jpg,nocompress.jpeg,nocompress.png}`]
-});
+const imgFiles = await glob(`${inputDir}/**/*.{jpg,jpeg,png}`);
 const compressed_images_cache = await fs.readJson(`${cwd}/.compressed_images_cache.json`).catch(() => ([]));
-const new_compressed_images_cache = [...compressed_images_cache];
+const new_compressed_images_cache = [...compressed_images_cache]
+console.log(compressed_images_cache);
 
 const getFileMD5 = async (filePath) => {
     const data = await fs.readFile(filePath);
@@ -51,9 +34,9 @@ const q = fastq.promise(async (task) => {
     let newFileBuf;
     const oldFileSize = (await fs.stat(input)).size;
     const oldFileMd5 = await getFileMD5(input);
-    log.debug(`MD5 hash of ${relativePath}: ${oldFileMd5}`);
+    console.log(`MD5 hash of ${relativePath}: ${oldFileMd5}`);
     if (compressed_images_cache.includes(oldFileMd5)) {
-        log.debug(`skip ${relativePath}`)
+        echo(`skip ${relativePath}`)
         return
     }
     try {
@@ -65,19 +48,19 @@ const q = fastq.promise(async (task) => {
                 .jpeg({ quality }).toBuffer()
         }
     } catch (error) {
-        log.error(error)
+        echo.error(error)
         return
     }
 
     if (newFileBuf.length >= oldFileSize) {
         new_compressed_images_cache.push(oldFileMd5)
-        log.debug(`skip ${relativePath} ${Date.now() - timeStart}ms ${formatBytes(oldFileSize)} -> ${formatBytes(newFileBuf.length)}, ${oldFileMd5}`)
+        echo(`skip ${relativePath} ${Date.now() - timeStart}ms ${formatBytes(oldFileSize)} -> ${formatBytes(newFileBuf.length)}, ${oldFileMd5}`)
         return
     }
     await fs.writeFile(input, newFileBuf)
     const newFileMd5 = await getBufMD5(newFileBuf);
     new_compressed_images_cache.push(newFileMd5)
-    log.info(`done ${relativePath} ${Date.now() - timeStart}ms ${formatBytes(oldFileSize)} -> ${formatBytes(newFileBuf.length)}, ${newFileMd5}`)
+    echo(`done ${relativePath} ${Date.now() - timeStart}ms ${formatBytes(oldFileSize)} -> ${formatBytes(newFileBuf.length)}, ${newFileMd5}`)
 }, os.cpus().length)
 
 
